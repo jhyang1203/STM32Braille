@@ -185,11 +185,11 @@ void StartListenerTask(void const * argument)
 void StartControllerTask(void const * argument)
 {
   /* USER CODE BEGIN StartControllerTask */
-
+	Controller_Init();
 	/* Infinite loop */
 	for(;;)
 	{
-
+		Controller_Execute();
 		osDelay(1);
 	}
   /* USER CODE END StartControllerTask */

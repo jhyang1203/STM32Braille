@@ -44,7 +44,7 @@ uint8_t GetBraillePattern()
 	if (HAL_GPIO_ReadPin(Switch[4].GPIOx, Switch[4].pinNum) == GPIO_PIN_SET) pattern |= (1 << 4); // ●5 ← Switch 5
 	if (HAL_GPIO_ReadPin(Switch[5].GPIOx, Switch[5].pinNum) == GPIO_PIN_SET) pattern |= (1 << 5); // ●6 ← Switch 6
 
-	HAL_UART_Transmit(&huart2, (uint8_t *)&pattern, 1, 1000);
+
 
 	return pattern;
 }

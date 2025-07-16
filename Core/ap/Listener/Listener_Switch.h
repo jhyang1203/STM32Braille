@@ -14,7 +14,6 @@
 
 extern UART_HandleTypeDef huart2;
 
-
 extern osMessageQId brailleMsgBox;
 
 void Listener_SwitchStop();

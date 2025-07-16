@@ -8,7 +8,12 @@
 #ifndef AP_CONTROLLER_CONTROLLER_H_
 #define AP_CONTROLLER_CONTROLLER_H_
 
+#include "stm32f4xx_hal.h"
+#include "Model_Listener_Controller.h"
+#include "Model_Controller_Presenter.h"
+#include "Switch.h"
 
+extern UART_HandleTypeDef huart2; // huart2 전역 핸들 참조
 
 void Controller_Init();
 void Controller_Execute();

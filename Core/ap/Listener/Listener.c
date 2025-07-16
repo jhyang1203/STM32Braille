@@ -15,6 +15,7 @@ uint8_t state = S_BRAILLE_MEASURE;
 void Listener_Init()
 {
 	Button_Init(&hbtnMode, GPIOB, GPIO_PIN_2);
+	Model_Listener_Controller_Init();
 }
 
 void Listener_Execute()
