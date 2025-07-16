@@ -1,3 +1,3 @@
 # STM32Braille
 
-서보모터 각도 제어 성공
+Listener btn, Switch 입력으로 uart 출력 성공
