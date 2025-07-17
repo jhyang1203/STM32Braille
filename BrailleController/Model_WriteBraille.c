@@ -24,7 +24,7 @@ void Model_WriteBrailleInit()
 
 uint8_t Model_ReceiveSwitchBits()
 {
-    osEvent evt = osMailGet(BrailleSwitchMailBox, 0);  // non-blocking
+    osEvent evt = osMailGet(BrailleSwitchMailBox, 0);
     if (evt.status == osEventMail) {
         uint8_t *pBits = (uint8_t *)evt.value.p;
         uint8_t bits = *pBits;
@@ -32,5 +32,5 @@ uint8_t Model_ReceiveSwitchBits()
         return bits;
     }
 
-    return 0x00;  // default fallback
+    return 0x00;
 }
