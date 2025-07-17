@@ -25,7 +25,7 @@ void Controller_Init()
 //		char msg[64];
 //		sprintf(msg, "Bits: %02X -> %c\r\n", p->bits, ConvertBrailleToAlphabet(p->bits));
 //		HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-	}
+//	}
 
 //	osEvent evt = osMailGet(BrailleSwitchMailBox, 0);
 //	if (evt.status == osEventMail) {
