@@ -59,27 +59,33 @@ char ConvertBrailleToAlphabet(uint8_t bits)
 
 void WriteBraille_Run()
 {
-	osEvent evt = osMailGet(BrailleSwitchMailBox, 0);  // non-blocking
-	if (evt.status != osEventMail) return;  // ❗ Mail 없으면 아무것도 하지 않음
-
+	osEvent evt = osMailGet(BrailleSwitchMailBox, 0);
+	// 논블로킹으로 메일박스에서 가져옴
+	if (evt.status != osEventMail) return;
+	// get 이벤트가 발생하지 않으면 함수 종료 (아무것도 안함)
 	Switch_t *recv = (Switch_t *)evt.value.p;
+	// 메일 박스에서 가져온 데이터의 값을 switch 타입의 recv에 넣음
 	uint8_t bits = recv->bits;
+	// bits에 해당 데이터 넣음
 	char alpha = ConvertBrailleToAlphabet(bits);
+	// alpha에 비트 값을 알파벳으로 변환후 넣어줌
 	osMailFree(BrailleSwitchMailBox, recv);
-
-	//테스트용
-//	char msg[64];
-//	sprintf(msg, "Bits: %02X -> %c\r\n", bits, alpha);
-//	HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-	//테스트용
+	// 가져왔으니 다시 해당 메일박스 비워줌
 
 	BrailleData.brailleBits = bits;
 	BrailleData.alphabet = alpha;
+	// braille 데이터에 해당 값들 넣어줌
+
 
 	Braille_t *pBrailleData = osMailAlloc(BrailleDataMailBox, 0);
+	// 브레일 데이터 형태 메일박스에 넣을거임 (구조체를 넣기 위해 빈슬롯 할당 요청)
+
 	if (pBrailleData != NULL) {
+	// 슬롯 할당 성공했으면
 		memcpy(pBrailleData, &BrailleData, sizeof(Braille_t));
+		// pbraille 데이터에 Brailledata값 복사함
 		osMailPut(BrailleDataMailBox, pBrailleData);
+		// 메일박스에 pbrqille데이터 넣어줌
 	}
 }
 
