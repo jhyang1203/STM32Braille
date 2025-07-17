@@ -47,8 +47,8 @@ char ConvertBrailleToAlphabet(uint8_t bits)
 	case 0b011010: return 'S';
 	case 0b011110: return 'T';
 	case 0b100011: return 'U';
-	case 0b101001: return 'V';
-	case 0b011111: return 'W';
+	case 0b101011: return 'V';
+	case 0b011101: return 'W';
 	case 0b110011: return 'X';
 	case 0b110111: return 'Y';
 	case 0b100111: return 'Z';
@@ -68,9 +68,9 @@ void WriteBraille_Run()
 	osMailFree(BrailleSwitchMailBox, recv);
 
 	//테스트용
-	char msg[64];
-	sprintf(msg, "Bits: %02X -> %c\r\n", bits, alpha);
-	HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+//	char msg[64];
+//	sprintf(msg, "Bits: %02X -> %c\r\n", bits, alpha);
+//	HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
 	//테스트용
 
 	BrailleData.brailleBits = bits;
