@@ -13,15 +13,14 @@ void Controller_CheckEventMode();
 
 void Controller_Init()
 {
-	Model_ModeInit();
 	WriteBraille_Init();
 	Model_SetModeState(S_STOP_MODE);
 
 	// uart 테스트용
-	Switch_t *p = osMailAlloc(BrailleSwitchMailBox, 0);
-	if (p != NULL) {
-		p->bits = 0b110000;  // C
-		osMailPut(BrailleSwitchMailBox, p);
+//	Switch_t *p = osMailAlloc(BrailleSwitchMailBox, 0);
+//	if (p != NULL) {
+//		p->bits = 0b100100;  // e
+//		osMailPut(BrailleSwitchMailBox, p);
 
 //		char msg[64];
 //		sprintf(msg, "Bits: %02X -> %c\r\n", p->bits, ConvertBrailleToAlphabet(p->bits));
@@ -48,12 +47,12 @@ void Controller_Excute()
 	switch (state)
 	{
 	case S_MOTOR_MODE:
-		//WriteBraille_Excute();
+		WriteBraille_Excute();
 		Model_SetModeState(S_STOP_MODE);
 		break;
 	case S_STOP_MODE:
-		WriteBraille_Excute();
-		Model_SetModeState(S_MOTOR_MODE);
+		//WriteBraille_Excute();
+		//Model_SetModeState(S_MOTOR_MODE);
 		break;
 	}
 
