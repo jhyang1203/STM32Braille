@@ -18,5 +18,6 @@ void Motor_Stop();
 void Motor_SetAngle(uint32_t degree);
 void Motor_DisplayBits(uint8_t bits6);
 void Motor_DisplayBraille(char data);
+void Motor_ResetAllDots();
 
 #endif /* DRIVER_BUZZER_BUZZER_H_ */
