@@ -30,10 +30,9 @@
 #include "Listener.h"
 #include "Controller.h"
 #include "Presenter.h"
-#include "Model_Mode.h"
-#include "Model_TimeWatch.h"
-#include "Model_StopWatch.h"
-#include "Model_Braille.h"
+#include "Model_Listener_Controller.h"
+#include "nrf24l01p.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -53,9 +52,6 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-
-//btn_led_t btnData;
-
 
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
@@ -115,6 +111,7 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_QUEUES */
 	/* add queues, ... */
+
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
@@ -127,7 +124,7 @@ void MX_FREERTOS_Init(void) {
   myListenerTaskHandle = osThreadCreate(osThread(myListenerTask), NULL);
 
   /* definition and creation of myControllerTas */
-  osThreadDef(myControllerTas, StartControllerTask, osPriorityNormal, 0, 128);
+  osThreadDef(myControllerTas, StartControllerTask, osPriorityRealtime, 0, 128);
   myControllerTasHandle = osThreadCreate(osThread(myControllerTas), NULL);
 
   /* definition and creation of myPresenterTask */
@@ -135,12 +132,9 @@ void MX_FREERTOS_Init(void) {
   myPresenterTaskHandle = osThreadCreate(osThread(myPresenterTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
-	Model_ModeInit();
-	Model_TimeWatchInit();
-	Model_StopWatchInit();
-	Model_BrailleInit();
+	Model_Listener_Controller_Init();
+	nrf24l01p_rx_init(2500, _1Mbps);
 	HAL_TIM_Base_Start_IT(&htim5);
-
 	/* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
@@ -156,13 +150,10 @@ void MX_FREERTOS_Init(void) {
 void StartDefaultTask(void const * argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
-	Model_SendBrailleInput(0b111000, 'F'); // alphabet은 작동 안하고 6bit만 모터 출력
-//	Motor_DisplayBraille('M'); //정상
-//	Motor_DisplayBits(0b111000); //정상
 	/* Infinite loop */
 	for(;;)
 	{
-		osDelay(50);
+		osDelay(1);
 	}
   /* USER CODE END StartDefaultTask */
 }
@@ -178,10 +169,24 @@ void StartListenerTask(void const * argument)
 {
   /* USER CODE BEGIN StartListenerTask */
 	Listener_Init();
+	uint8_t rx_buf[NRF24L01P_PAYLOAD_LENGTH];
+	char msg[64];
 	/* Infinite loop */
 	for(;;)
 	{
-		Listener_Excute();
+		Listener_Execute();
+
+		if (HAL_GPIO_ReadPin(NRF24L01P_IRQ_PIN_PORT, NRF24L01P_IRQ_PIN_NUMBER) == GPIO_PIN_RESET) {
+			nrf24l01p_rx_receive(rx_buf);
+
+			Motor_DisplayBits(rx_buf[0]);
+
+			snprintf(msg, sizeof(msg), "rx data: 0x%02X \r\n", rx_buf[0]);
+
+			HAL_UART_Transmit(&huart2, (uint8_t *)msg, strlen(msg), 10);
+
+		}
+
 		osDelay(1);
 	}
   /* USER CODE END StartListenerTask */
@@ -201,7 +206,7 @@ void StartControllerTask(void const * argument)
 	/* Infinite loop */
 	for(;;)
 	{
-		Controller_Excute();
+		Controller_Execute();
 		osDelay(1);
 	}
   /* USER CODE END StartControllerTask */
