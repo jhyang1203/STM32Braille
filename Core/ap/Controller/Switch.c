@@ -63,7 +63,7 @@ void Switch_Execute()
             HAL_UART_Transmit(&huart2, (uint8_t *)msg, strlen(msg), 1000);
 
             osMailPut(brailleCharMailBox, pData);
-            osMailFree(brailleCharMailBox, pData);  // 💡 이거 없으면 8개 제한
+          //  osMailFree(brailleCharMailBox, pData);  // 💡 이거 없으면 8개 제한
         }
     }
 }

@@ -17,7 +17,7 @@ void Listener_CNNExecute()
 {
 	char input = UART_ReceiveChar();
 	uint8_t pattern = GetBraillePatternFromChar(input);
-    osMessagePut(brailleMsgBox, pattern, 0);  // pattern 값을 메시지로 전송
+    osMessagePut(CNN_brailleMsgBox, pattern, 0);  // pattern 값을 메시지로 전송
 }
 
 // 문자 하나를 점자 6비트로 변환

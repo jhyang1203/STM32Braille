@@ -15,7 +15,7 @@
 
 extern UART_HandleTypeDef huart2;
 
-extern osMessageQId brailleMsgBox;
+extern osMessageQId CNN_brailleMsgBox;
 
 void Listener_CNNStop();
 void Listener_CNNExecute();

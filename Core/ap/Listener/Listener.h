@@ -18,6 +18,8 @@
 void Listener_Init();
 void Listener_Execute();
 
+extern uint8_t mode;
+
 typedef enum {S_READ_MODE, S_WRITE_MODE} eModestate_t;
 typedef enum {S_WRITE_STOP, S_WRITE_START} eWritestate_t;
 typedef enum {S_READ_STOP, S_READ_START} eReadstate_t;

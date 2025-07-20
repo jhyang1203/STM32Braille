@@ -12,6 +12,8 @@
 #include "Model_Listener_Controller.h"
 #include "Model_Controller_Presenter.h"
 #include "Switch.h"
+#include "Controller_CNN.h"
+#include "Listener.h"
 
 extern UART_HandleTypeDef huart2; // huart2 전역 핸들 참조
 

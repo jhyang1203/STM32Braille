@@ -12,6 +12,7 @@
 #include "Motor.h"
 #include "Model_Controller_Presenter.h"
 
+extern UART_HandleTypeDef huart2;
 
 void Presenter_MotorInit();
 void Presenter_MotorExcute();
