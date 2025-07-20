@@ -19,13 +19,14 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-#include "Presenter_Motor.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "nrf24l01p.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -35,6 +36,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define TRANSMITTER
+// #define RECEIVER  // 수신이면 이걸 주석 해제
 
 /* USER CODE END PD */
 
@@ -94,7 +97,16 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM5_Init();
   MX_TIM2_Init();
+  MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
+	#ifdef RECEIVER
+	  nrf24l01p_rx_init(2500, _1Mbps);
+	#endif
+
+	#ifdef TRANSMITTER
+	  nrf24l01p_tx_init(2500, _1Mbps);
+	#endif
+
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in cmsis_os2.c) */
@@ -162,6 +174,19 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+	void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+	{
+	  if (GPIO_Pin == NRF24L01P_IRQ_PIN_NUMBER)
+	  {
+	#ifdef RECEIVER
+		nrf24l01p_rx_receive(rx_data);
+	#endif
+
+	#ifdef TRANSMITTER
+		nrf24l01p_tx_irq();
+	#endif
+	  }
+	}
 
 /* USER CODE END 4 */
 

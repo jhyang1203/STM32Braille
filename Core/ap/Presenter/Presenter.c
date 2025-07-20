@@ -16,5 +16,8 @@ void Presenter_Init()
 
 void Presenter_Excute()
 {
-	Presenter_MotorExcute();
+	if (mode == S_READ_MODE) Presenter_MotorExcute();
+
+	else if (mode == S_WRITE_MODE) Presenter_RFExcute();
+
 }

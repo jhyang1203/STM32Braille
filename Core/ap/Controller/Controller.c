@@ -16,7 +16,9 @@ void Controller_Init()
 
 void Controller_Execute()
 {
-	Switch_Execute();
+	if (mode == S_READ_MODE) CNN_Execute();
+
+	else if (mode == S_WRITE_MODE) Switch_Execute();
 }
 
 
