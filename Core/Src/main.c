@@ -27,6 +27,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "nrf24l01p.h"
+#include "Listener.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -36,7 +37,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define TRANSMITTER
+
 // #define RECEIVER  // 수신이면 이걸 주석 해제
 
 /* USER CODE END PD */
@@ -98,14 +99,17 @@ int main(void)
   MX_TIM5_Init();
   MX_TIM2_Init();
   MX_SPI2_Init();
+  MX_USART1_UART_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
-	#ifdef RECEIVER
+	//nrf24l01p_rx_init(2500, _1Mbps);
+//	#ifdef RECEIVER
 	  nrf24l01p_rx_init(2500, _1Mbps);
-	#endif
-
-	#ifdef TRANSMITTER
-	  nrf24l01p_tx_init(2500, _1Mbps);
-	#endif
+//	#endif
+//
+//	#ifdef TRANSMITTER
+//	  nrf24l01p_tx_init(2500, _1Mbps);
+//	#endif
 
   /* USER CODE END 2 */
 
@@ -176,17 +180,28 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 	void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	{
+	    uint8_t rx_buf[NRF24L01P_PAYLOAD_LENGTH];
+	    char msg[64];
+
 	  if (GPIO_Pin == NRF24L01P_IRQ_PIN_NUMBER)
 	  {
-	#ifdef RECEIVER
-		nrf24l01p_rx_receive(rx_data);
-	#endif
+		  if (rf_state == S_RX_MODE){
+		        // NRF 모듈에서 수신된 데이터 읽기
+		        nrf24l01p_rx_receive(rx_buf);
 
-	#ifdef TRANSMITTER
-		nrf24l01p_tx_irq();
-	#endif
+		        // 수신 내용 UART 디버깅 출력
+		        snprintf(msg, sizeof(msg), "rx data: 0x%02X \r\n", rx_buf[0]);
+		        HAL_UART_Transmit(&huart2, (uint8_t *)msg, strlen(msg), 1000);
+
+		        osMessagePut(RFRx_brailleMsgBox, rx_buf[0], 0);  // pattern 값을 메시지로 전송
+		  }
+
+		  if (rf_state == S_TX_MODE){
+			nrf24l01p_tx_irq();               // 송신 완료 처리
+		  }
 	  }
 	}
+
 
 /* USER CODE END 4 */
 
@@ -208,9 +223,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-  if (htim->Instance == TIM2)
+  if (htim->Instance == TIM4)
   {
-//	  	Motor_ResetAllDots();
+	  HAL_UART_Transmit(&huart2, (uint8_t *)"timer callback---------------\r\n", strlen("timer callback------------------\r\n"), 1000);
+	  	tx_done_flag = 1;
   }
   /* USER CODE END Callback 1 */
 }

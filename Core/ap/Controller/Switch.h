@@ -16,6 +16,7 @@
 
 extern UART_HandleTypeDef huart2; // huart2 전역 핸들 참조
 
-void Switch_Execute();
+void Switch_TxExecute();
+void Switch_RxExecute();
 
 #endif /* AP_CONTROLLER_SWITCH_H_ */

@@ -11,9 +11,12 @@
 Button_Handler_t hbtnMode;
 Button_Handler_t hbtnStart;
 
-uint8_t mode= S_READ_MODE;
-uint8_t read_state = S_READ_STOP;
-uint8_t write_state = S_WRITE_STOP;
+uint8_t mode= S_RF_MODE;
+uint8_t cnn_state = S_CNN_STOP;
+uint8_t rf_state = S_RX_MODE;
+
+volatile uint8_t tx_done_flag;
+uint8_t tx_start;
 
 void Listener_Init()
 {
@@ -27,57 +30,69 @@ void Listener_Execute()
     char msg[64];
 	switch(mode)
 	{
-		case S_READ_MODE:
-			switch(read_state)
+		case S_CNN_MODE:
+			switch(cnn_state)
 			{
-				case S_READ_STOP:
+				case S_CNN_STOP:
 					if (Button_GetState(&hbtnMode) == ACT_RELEASED){
-						mode = S_WRITE_MODE;
-					    snprintf(msg, sizeof(msg), "Mode: %s \r\n", "write mode");
+						mode = S_RF_MODE;
+					    snprintf(msg, sizeof(msg), "Mode: %s \r\n", "rf mode");
 					    HAL_UART_Transmit(&huart2, (uint8_t *)msg, strlen(msg), 1000);
 					}
 					else {
 						Listener_CNNStop();
-						if (Button_GetState(&hbtnStart) == ACT_RELEASED) read_state = S_READ_START;
+						if (Button_GetState(&hbtnStart) == ACT_RELEASED) cnn_state = S_CNN_START;
 					}
 					break;
-				case S_READ_START:
+				case S_CNN_START:
 					if (Button_GetState(&hbtnMode) == ACT_RELEASED){
-						mode = S_WRITE_MODE;
-					    snprintf(msg, sizeof(msg), "Mode: %s ", "write mode");
+						mode = S_RF_MODE;
+					    snprintf(msg, sizeof(msg), "Mode: %s ", "rf mode");
 					    HAL_UART_Transmit(&huart2, (uint8_t *)msg, strlen(msg), 1000);
 					}
 					else {
 						Listener_CNNExecute();
-						read_state = S_READ_STOP;
+						cnn_state = S_CNN_STOP;
 					}
 					break;
 			}
 			break;
 
-		case S_WRITE_MODE:
-			switch(write_state)
+		case S_RF_MODE:
+			switch(rf_state)
 			{
-				case S_WRITE_STOP:
+				case S_RX_MODE:
 					if (Button_GetState(&hbtnMode) == ACT_RELEASED){
-						mode = S_READ_MODE;
-					    snprintf(msg, sizeof(msg), "Mode: %s \r\n", "read mode");
+						mode = S_CNN_MODE;
+					    snprintf(msg, sizeof(msg), "Mode: %s \r\n", "cnn mode");
 					    HAL_UART_Transmit(&huart2, (uint8_t *)msg, strlen(msg), 1000);
 					}
 					else {
-						Listener_SwitchStop();
-						if (Button_GetState(&hbtnStart) == ACT_RELEASED) write_state = S_WRITE_START;
+						Listener_Switch_RxExecute();
+						if (Button_GetState(&hbtnStart) == ACT_PUSHED) {
+							nrf24l01p_tx_init(2500, _1Mbps);
+					        rf_state = S_TX_MODE;
+					        tx_done_flag = 2;
+					        tx_start = 1;
+						}
 					}
 					break;
-				case S_WRITE_START:
+				case S_TX_MODE:
 					if (Button_GetState(&hbtnMode) == ACT_RELEASED){
-						mode = S_READ_MODE;
-					    snprintf(msg, sizeof(msg), "Mode: %s ", "read mode");
+						mode = S_CNN_MODE;
+					    snprintf(msg, sizeof(msg), "Mode: %s ", "cnn mode");
 					    HAL_UART_Transmit(&huart2, (uint8_t *)msg, strlen(msg), 1000);
 					}
-					else {
-						Listener_SwitchExecute();
-						write_state = S_WRITE_STOP;
+					else if (tx_done_flag==2) { // 송신 모드
+						Listener_Switch_TxExecute();  // 🔸 전송 실행
+						tx_start = 0;
+					    HAL_TIM_Base_Start_IT(&htim4);
+					}
+					else if (tx_done_flag==1) { // 수신 모드로 변경
+					    HAL_TIM_Base_Stop_IT(&htim4);  // 타이머 인터럽트 정지 (1회만 사용)
+						HAL_UART_Transmit(&huart2, (uint8_t *)"tx finish\r\n", strlen("tx finish\r\n"), 1000);
+						nrf24l01p_rx_init(2500, _1Mbps);
+						rf_state = S_RX_MODE;
 					}
 					break;
 			}
