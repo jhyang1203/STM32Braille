@@ -22,15 +22,16 @@ Switch_TypeDef Switch[6] = {
 		{GPIOB, GPIO_PIN_12}, 	// switch 6
 };
 
-void Listener_SwitchStop()
+void Listener_Switch_RxExecute()
 {
+
 
 }
 
-void Listener_SwitchExecute()
+void Listener_Switch_TxExecute()
 {
     uint8_t pattern = GetBraillePattern();
-    osMessagePut(brailleMsgBox, pattern, 0);  // pattern 값을 메시지로 전송
+    osMessagePut(RFTx_brailleMsgBox, pattern, 0);  // pattern 값을 메시지로 전송
 }
 
 uint8_t GetBraillePattern()
@@ -43,8 +44,6 @@ uint8_t GetBraillePattern()
 	if (HAL_GPIO_ReadPin(Switch[3].GPIOx, Switch[3].pinNum) == GPIO_PIN_SET) pattern |= (1 << 3); // ●4 ← Switch 4
 	if (HAL_GPIO_ReadPin(Switch[4].GPIOx, Switch[4].pinNum) == GPIO_PIN_SET) pattern |= (1 << 4); // ●5 ← Switch 5
 	if (HAL_GPIO_ReadPin(Switch[5].GPIOx, Switch[5].pinNum) == GPIO_PIN_SET) pattern |= (1 << 5); // ●6 ← Switch 6
-
-
 
 	return pattern;
 }

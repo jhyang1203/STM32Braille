@@ -16,7 +16,8 @@ typedef struct {
     char character;
 } BrailleChar_t;
 
-extern osMailQId brailleCharMailBox;
+extern osMailQId RFTx_brailleCharMailBox;
+extern osMailQId RFRx_brailleCharMailBox;
 extern osMailQId CNN_brailleCharMailBox;  // 메시지 큐 핸들
 
 void Model_Controller_Presenter_Init();

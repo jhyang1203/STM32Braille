@@ -36,9 +36,9 @@ const BrailleChar_t braille_table[] = {
     {0x39, 'Z'}   // ●1 ●4 ●5 ●6
 };
 
-void Switch_Execute()
+void Switch_TxExecute()
 {
-    osEvent evt = osMessageGet(brailleMsgBox, 0); // 패턴 수신
+    osEvent evt = osMessageGet(RFTx_brailleMsgBox, 0); // 패턴 수신
     uint8_t pattern;
 
     if (evt.status == osEventMessage) {
@@ -53,7 +53,7 @@ void Switch_Execute()
         }
 
         // 구조체 생성 및 메일 큐 전송
-        BrailleChar_t *pData = osMailAlloc(brailleCharMailBox, 0);
+        BrailleChar_t *pData = osMailAlloc(RFTx_brailleCharMailBox, 0);
         if (pData != NULL) {
             pData->pattern = pattern;
             pData->character = matchedChar;
@@ -62,10 +62,43 @@ void Switch_Execute()
             snprintf(msg, sizeof(msg), "pattern: 0x%02X, character: %c\r\n", pData->pattern, pData->character);
             HAL_UART_Transmit(&huart2, (uint8_t *)msg, strlen(msg), 1000);
 
-            osMailPut(brailleCharMailBox, pData);
+            osMailPut(RFTx_brailleCharMailBox, pData);
           //  osMailFree(brailleCharMailBox, pData);  // 💡 이거 없으면 8개 제한
         }
     }
 }
 
 
+void Switch_RxExecute()
+{
+    osEvent evt = osMessageGet(RFRx_brailleMsgBox, 0); // 패턴 수신
+    uint8_t pattern;
+
+
+    if (evt.status == osEventMessage) {
+        pattern = evt.value.v;
+        HAL_UART_Transmit(&huart2, (uint8_t *)"controller_switch\r\n", strlen("controller_switch\r\n"), 1000);
+
+        char matchedChar = '?';  // 기본값: 매칭 안 됨 표시
+        for (int i = 0; i < sizeof(braille_table)/sizeof(BrailleChar_t); i++) {
+            if (braille_table[i].pattern == pattern) {
+                matchedChar = braille_table[i].character;
+                break;
+            }
+        }
+
+        // 구조체 생성 및 메일 큐 전송
+        BrailleChar_t *pData_rx = osMailAlloc(RFRx_brailleCharMailBox, 0);
+        if (pData_rx != NULL) {
+        	pData_rx->pattern = pattern;
+        	pData_rx->character = matchedChar;
+
+            char msg[64];
+            snprintf(msg, sizeof(msg), "pattern: 0x%02X, character: %c\r\n", pData_rx->pattern, pData_rx->character);
+            HAL_UART_Transmit(&huart2, (uint8_t *)msg, strlen(msg), 1000);
+
+            osMailPut(RFRx_brailleCharMailBox, pData_rx);
+          //  osMailFree(brailleCharMailBox, pData);  // 💡 이거 없으면 8개 제한
+        }
+    }
+}

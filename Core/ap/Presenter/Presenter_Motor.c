@@ -16,8 +16,6 @@
 #include "Motor.h"
 //#include "Model_Braille.h"
 
-extern osMailQId brailleCharMailBox;
-
 void Presenter_MotorInit()
 {
 	Motor_Init(&htim5, TIM_CHANNEL_1);
@@ -47,4 +45,5 @@ void Presenter_MotorExcute()
 		osMailFree(CNN_brailleCharMailBox, p);
 
 	}
+
 }

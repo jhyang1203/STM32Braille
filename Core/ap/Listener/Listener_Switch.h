@@ -11,13 +11,17 @@
 #include "stm32f4xx_hal.h"     // GPIO_TypeDef, HAL_XXX, GPIO_PIN_XXX
 #include "cmsis_os.h"         // osMessageQId, osMessagePut
 #include <stdint.h>           // uint8_t, uint32_t
+#include "nrf24l01p.h"
+#include "string.h"
+#include <stdio.h>
 
 extern UART_HandleTypeDef huart2;
 
-extern osMessageQId brailleMsgBox;
+extern osMessageQId RFTx_brailleMsgBox;
+extern osMessageQId RFRx_brailleMsgBox;
 
-void Listener_SwitchStop();
-void Listener_SwitchExecute();
+void Listener_Switch_TxExecute();
+void Listener_Switch_RxExecute();
 uint8_t GetBraillePattern();
 
 
