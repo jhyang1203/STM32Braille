@@ -11,7 +11,9 @@
 #include <stdint.h>
 #include "cmsis_os.h"
 
-extern osMessageQId brailleMsgBox;
+extern osMessageQId RFTx_brailleMsgBox;
+extern osMessageQId RFRx_brailleMsgBox;
+extern osMessageQId CNN_brailleMsgBox;  // 메시지 큐 핸들
 
 void Model_Listener_Controller_Init();
 

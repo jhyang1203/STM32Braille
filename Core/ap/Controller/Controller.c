@@ -16,13 +16,11 @@ void Controller_Init()
 
 void Controller_Execute()
 {
-	Switch_Execute();
+	if (mode == S_CNN_MODE) CNN_Execute();
+
+	else if (mode == S_RF_MODE) {
+		Switch_RxExecute();
+		Switch_TxExecute();
+	}
 }
-
-
-
-
-
-
-
 

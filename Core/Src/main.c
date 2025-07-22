@@ -19,13 +19,17 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "dma.h"
+#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-#include "Presenter_Motor.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "nrf24l01p.h"
+#include "Listener.h"
+#include "ili9341.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -35,6 +39,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
+// #define RECEIVER  // 수신이면 이걸 주석 해제
 
 /* USER CODE END PD */
 
@@ -78,7 +84,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  ILI9341_Init();
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -90,11 +96,25 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART2_UART_Init();
   MX_TIM3_Init();
   MX_TIM5_Init();
   MX_TIM2_Init();
+  MX_SPI2_Init();
+  MX_USART1_UART_Init();
+  MX_TIM4_Init();
+  MX_SPI3_Init();
   /* USER CODE BEGIN 2 */
+	//nrf24l01p_rx_init(2500, _1Mbps);
+//	#ifdef RECEIVER
+	  nrf24l01p_rx_init(2500, _1Mbps);
+//	#endif
+//
+//	#ifdef TRANSMITTER
+//	  nrf24l01p_tx_init(2500, _1Mbps);
+//	#endif
+
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in cmsis_os2.c) */
@@ -162,6 +182,40 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+	void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+	{
+	    uint8_t rx_buf[NRF24L01P_PAYLOAD_LENGTH];
+	    char msg[64];
+
+	  if (GPIO_Pin == NRF24L01P_IRQ_PIN_NUMBER)
+	  {
+		  if (rf_state == S_RX_MODE){
+			  nrf24l01p_read_rx_fifo_dma(); 	// NRF 모듈에서 수신된 데이터 읽기
+		  }
+
+		  if (rf_state == S_TX_MODE){
+			  nrf24l01p_tx_irq();               // 송신 완료 처리
+		  }
+	  }
+	}
+
+	void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
+	{
+	    if (hspi->Instance == SPI2 && rf_state == S_RX_MODE)
+	    {
+	        cs_high();  // ✅ 통신 종료
+	        HAL_UART_Transmit(&huart2, (uint8_t *)"tx rx callback\r\n", strlen("tx rx callback\r\n"), 1000);
+	        uint8_t status = spi_rx_buf[0]; 	        // STATUS 레지스터 확인 (선택사항)
+	        uint8_t* Rx_Data = &spi_rx_buf[1];	        // 실제 수신 데이터 (32바이트)
+
+	        nrf24l01p_clear_rx_dr();	        		// status 플래그 클리어
+
+	        osMessagePut(RFRx_brailleMsgBox, Rx_Data[0], 0); // 메시지 큐로 데이터 전송
+
+	        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);	        // 디버깅용 LED 토글
+	    }
+	}
+
 
 /* USER CODE END 4 */
 
@@ -183,9 +237,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-  if (htim->Instance == TIM2)
+  if (htim->Instance == TIM4)
   {
-//	  	Motor_ResetAllDots();
+	  HAL_UART_Transmit(&huart2, (uint8_t *)"timer callback---------------\r\n", strlen("timer callback------------------\r\n"), 1000);
+	  	tx_done_flag = 1;
   }
   /* USER CODE END Callback 1 */
 }

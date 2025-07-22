@@ -8,15 +8,9 @@
 
 
 #include "Presenter_Motor.h"
-#include <string.h>
-#include <stdint.h>
-#include <stdio.h>
-#include "cmsis_os.h"
-#include "tim.h"
-#include "Motor.h"
-//#include "Model_Braille.h"
 
-extern osMailQId brailleCharMailBox;
+
+//#include "Model_Braille.h"
 
 void Presenter_MotorInit()
 {
@@ -31,15 +25,19 @@ void Presenter_MotorInit()
 
 void Presenter_MotorExcute()
 {
-	osEvent evt = osMailGet(brailleCharMailBox, 0);
+	osEvent evt = osMailGet(CNN_brailleCharMailBox, 0);
+
 	if (evt.status == osEventMail) {
 		BrailleChar_t *p = evt.value.p;
 		uint8_t bits6 = p->pattern;
-		//char alphabet   = p->alphabet;  // 나중에 LCD용
+		char character = p->character;
 
 		Motor_DisplayBits(bits6);
-		//Motor_DisplayBraille(alphabet);  // 나중에 LCD용
-		osMailFree(brailleCharMailBox, p);
+
+		LCD_Presenter_RX (character);
+
+		osMailFree(CNN_brailleCharMailBox, p);
 
 	}
+
 }

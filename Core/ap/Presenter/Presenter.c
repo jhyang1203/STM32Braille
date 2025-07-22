@@ -16,5 +16,11 @@ void Presenter_Init()
 
 void Presenter_Excute()
 {
-	Presenter_MotorExcute();
+	if (mode == S_CNN_MODE) Presenter_MotorExcute();
+
+	else if (mode == S_RF_MODE) {
+		Presenter_RF_RxExcute();
+		Presenter_RF_TxExcute();
+	}
+
 }
