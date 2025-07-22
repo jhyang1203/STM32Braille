@@ -1,7 +1,7 @@
 /* vim: set ai et ts=4 sw=4: */
 #include "stm32f4xx_hal.h"
 #include "ili9341.h"
-
+#include "usart.h"
 uint8_t* pImgData;
 size_t img_size;
 uint16_t chunk_size;
@@ -249,50 +249,6 @@ void ILI9341_DrawPixel(uint16_t x, uint16_t y, uint16_t color) {
 	ILI9341_Unselect();
 }
 
-//static void ILI9341_WriteChar(uint16_t x, uint16_t y, char ch, FontDef font, uint16_t color, uint16_t bgcolor) {
-//	uint32_t i, b, j;
-//
-//	ILI9341_SetAddressWindow(x, y, x+font.width-1, y+font.height-1);
-//
-//	for(i = 0; i < font.height; i++) {
-//		b = font.data[(ch - 32) * font.height + i];
-//		for(j = 0; j < font.width; j++) {
-//			if((b << j) & 0x8000)  {
-//				uint8_t data[] = { color >> 8, color & 0xFF };
-//				ILI9341_WriteData(data, sizeof(data));
-//			} else {
-//				uint8_t data[] = { bgcolor >> 8, bgcolor & 0xFF };
-//				ILI9341_WriteData(data, sizeof(data));
-//			}
-//		}
-//	}
-//}
-
-//static void ILI9341_WriteChar(uint16_t x, uint16_t y, char ch, FontDef font, uint16_t color, uint16_t bgcolor) {
-//    uint32_t i, b, j, dx, dy;
-//
-//    // 확대된 영역 설정 (원래 폰트 크기에 확대 배수를 곱함)
-//    ILI9341_SetAddressWindow(x, y, x + font.width * SCALE_X - 1, y + font.height * SCALE_Y - 1);
-//
-//    for (i = 0; i < font.height; i++) {
-//        b = font.data[(ch - 32) * font.height + i];
-//        for (j = 0; j < font.width; j++) {
-//            // 픽셀 켜짐 여부 체크
-//            uint16_t pixel_on = ((b << j) & 0x8000) ? 1 : 0;
-//
-//            // 한 픽셀을 가로세로 확대하여 여러 픽셀로 출력
-//            for (dy = 0; dy < SCALE_Y; dy++) {
-//                for (dx = 0; dx < SCALE_X; dx++) {
-//                    uint8_t data[] = {
-//                        (pixel_on ? color : bgcolor) >> 8,
-//                        (pixel_on ? color : bgcolor) & 0xFF
-//                    };
-//                    ILI9341_WriteData(data, sizeof(data));
-//                }
-//            }
-//        }
-//    }
-//}
 static void ILI9341_WriteChar(uint16_t x, uint16_t y, char ch, FontDef font, uint16_t color, uint16_t bgcolor) {
     uint32_t i, j, dx, dy;
     uint16_t b;
@@ -323,47 +279,25 @@ static void ILI9341_WriteChar(uint16_t x, uint16_t y, char ch, FontDef font, uin
 }
 
 
-//void ILI9341_WriteString(uint16_t x, uint16_t y, const char* str, FontDef font, uint16_t color, uint16_t bgcolor) {
-//	ILI9341_Select();
-//
-//	while(*str) {
-//		if(x + font.width >= ILI9341_WIDTH) {
-//			x = 0;
-//			y += font.height;
-//			if(y + font.height >= ILI9341_HEIGHT) {
-//				break;
-//			}
-//
-//			if(*str == ' ') {
-//				// skip spaces in the beginning of the new line
-//				str++;
-//				continue;
-//			}
-//		}
-//
-//		ILI9341_WriteChar(x, y, *str, font, color, bgcolor);
-//		x += font.width;
-//		str++;
-//	}
-//
-//	ILI9341_Unselect();
-//}
 void ILI9341_WriteString(uint16_t x, uint16_t y, const char* str, FontDef font, uint16_t color, uint16_t bgcolor) {
+
     ILI9341_Select();
 
     size_t len = strlen(str);
 
-    if(len == 1){
+    if(len == 4){
     	font.scale_x = 20; font.scale_y = 24;
     } else if(len == 2) {
     	font.scale_x = 8; font.scale_y = 10;
     } else if(len == 3) {
     	font.scale_x = 7; font.scale_y = 9;
-    } else if(len == 4) {
+    } else if(len == 1) {
     	font.scale_x = 5; font.scale_y = 7;
     } else {
     	font.scale_x = 2; font.scale_y = 4;
     }
+
+
 
     uint16_t text_width = len * font.width * font.scale_x;
     uint16_t text_height = font.height * font.scale_y;
@@ -371,8 +305,11 @@ void ILI9341_WriteString(uint16_t x, uint16_t y, const char* str, FontDef font, 
     uint16_t x_start = (ILI9341_WIDTH - text_width) / 2;
     uint16_t y_start = (ILI9341_HEIGHT - text_height) / 2;
 
+
     while (*str) {
         // 화면 경계 검사 (확대된 크기로 판단)
+
+
         if (x_start + font.width * font.scale_x >= ILI9341_WIDTH) {
             x_start = 0;
             y_start += font.height * font.scale_y;

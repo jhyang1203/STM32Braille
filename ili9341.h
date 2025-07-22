@@ -5,6 +5,7 @@
 #include "fonts.h"
 #include <stdbool.h>
 #include <string.h>
+#include "stm32f4xx.h"
 
 #define ILI9341_MADCTL_MY  0x80
 #define ILI9341_MADCTL_MX  0x40
