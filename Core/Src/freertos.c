@@ -31,6 +31,8 @@
 #include "Controller.h"
 #include "Presenter.h"
 #include "Model_Listener_Controller.h"
+#include "dfp_mini.h"
+
 
 /* USER CODE END Includes */
 
@@ -93,7 +95,8 @@ void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackTy
   */
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
-
+	ILI9341_Init();
+//	dfp_init(5);
   /* USER CODE END Init */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -212,7 +215,7 @@ void StartPresenterTask(void const * argument)
 	for(;;)
 	{
 		Presenter_Excute();
-		osDelay(1);
+		osDelay(100);
 	}
   /* USER CODE END StartPresenterTask */
 }

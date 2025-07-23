@@ -67,6 +67,8 @@ void Error_Handler(void);
 #define sw3_GPIO_Port GPIOC
 #define btn_start_Pin GPIO_PIN_2
 #define btn_start_GPIO_Port GPIOB
+#define busy_Pin GPIO_PIN_10
+#define busy_GPIO_Port GPIOB
 #define sw6_Pin GPIO_PIN_12
 #define sw6_GPIO_Port GPIOB
 #define sw2_Pin GPIO_PIN_6
@@ -80,6 +82,10 @@ void Error_Handler(void);
 #define sw5_GPIO_Port GPIOA
 #define sw4_Pin GPIO_PIN_12
 #define sw4_GPIO_Port GPIOA
+#define btn_volumeup_Pin GPIO_PIN_8
+#define btn_volumeup_GPIO_Port GPIOB
+#define btn_volumedown_Pin GPIO_PIN_9
+#define btn_volumedown_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

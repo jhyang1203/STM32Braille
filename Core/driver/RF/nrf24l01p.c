@@ -9,6 +9,8 @@
 
 #include "nrf24l01p.h"
 
+uint8_t spi_rx_buf[33];  // [0]: status, [1~32]: payload
+uint8_t spi_tx_buf[33];  // [0]: command, [1~32]: dummy
 
 uint8_t nrf24l01p_tx_noack(uint8_t* tx_payload)
 {
@@ -124,6 +126,16 @@ void nrf24l01p_rx_receive(uint8_t* rx_payload)
 
     HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 }
+
+void nrf24l01p_read_rx_fifo_dma(void)
+{
+    spi_tx_buf[0] = NRF24L01P_CMD_R_RX_PAYLOAD;
+    memset(&spi_tx_buf[1], 0xFF, NRF24L01P_PAYLOAD_LENGTH);  // dummy bytes
+
+    cs_low();
+    HAL_SPI_TransmitReceive_DMA(NRF24L01P_SPI, spi_tx_buf, spi_rx_buf, NRF24L01P_PAYLOAD_LENGTH + 1);
+}
+
 
 void nrf24l01p_tx_transmit(uint8_t* tx_payload)
 {

@@ -12,6 +12,7 @@
 void Presenter_Init()
 {
 	Presenter_MotorInit();
+	Presenter_DFPMiniInit();
 }
 
 void Presenter_Excute()
@@ -22,5 +23,4 @@ void Presenter_Excute()
 		Presenter_RF_RxExcute();
 		Presenter_RF_TxExcute();
 	}
-
 }

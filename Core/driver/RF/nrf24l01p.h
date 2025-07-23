@@ -54,12 +54,17 @@ typedef enum
 } output_power;
 
 
+extern uint8_t spi_rx_buf[33];  // [0]: status, [1~32]: payload
+extern uint8_t spi_tx_buf[33];  // [0]: command, [1~32]: dummy
+
 uint8_t nrf24l01p_tx_noack(uint8_t* tx_payload);
 void cs_high();
 void cs_low();
 /* Main Functions */
 void nrf24l01p_rx_init(channel MHz, air_data_rate bps);
 void nrf24l01p_tx_init(channel MHz, air_data_rate bps);
+
+void nrf24l01p_read_rx_fifo_dma(void);
 
 void nrf24l01p_rx_receive(uint8_t* rx_payload);
 void nrf24l01p_tx_transmit(uint8_t* tx_payload);

@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "dma.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
@@ -28,6 +29,7 @@
 /* USER CODE BEGIN Includes */
 #include "nrf24l01p.h"
 #include "Listener.h"
+#include "ili9341.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -82,7 +84,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  ILI9341_Init();
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -94,6 +96,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART2_UART_Init();
   MX_TIM3_Init();
   MX_TIM5_Init();
@@ -101,6 +104,7 @@ int main(void)
   MX_SPI2_Init();
   MX_USART1_UART_Init();
   MX_TIM4_Init();
+  MX_SPI3_Init();
   /* USER CODE BEGIN 2 */
 	//nrf24l01p_rx_init(2500, _1Mbps);
 //	#ifdef RECEIVER
@@ -186,20 +190,30 @@ void SystemClock_Config(void)
 	  if (GPIO_Pin == NRF24L01P_IRQ_PIN_NUMBER)
 	  {
 		  if (rf_state == S_RX_MODE){
-		        // NRF 모듈에서 수신된 데이터 읽기
-		        nrf24l01p_rx_receive(rx_buf);
-
-		        // 수신 내용 UART 디버깅 출력
-		        snprintf(msg, sizeof(msg), "rx data: 0x%02X \r\n", rx_buf[0]);
-		        HAL_UART_Transmit(&huart2, (uint8_t *)msg, strlen(msg), 1000);
-
-		        osMessagePut(RFRx_brailleMsgBox, rx_buf[0], 0);  // pattern 값을 메시지로 전송
+			  nrf24l01p_read_rx_fifo_dma(); 	// NRF 모듈에서 수신된 데이터 읽기
 		  }
 
 		  if (rf_state == S_TX_MODE){
-			nrf24l01p_tx_irq();               // 송신 완료 처리
+			  nrf24l01p_tx_irq();               // 송신 완료 처리
 		  }
 	  }
+	}
+
+	void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
+	{
+	    if (hspi->Instance == SPI2 && rf_state == S_RX_MODE)
+	    {
+	        cs_high();  // ✅ 통신 종료
+	        HAL_UART_Transmit(&huart2, (uint8_t *)"tx rx callback\r\n", strlen("tx rx callback\r\n"), 1000);
+	        uint8_t status = spi_rx_buf[0]; 	        // STATUS 레지스터 확인 (선택사항)
+	        uint8_t* Rx_Data = &spi_rx_buf[1];	        // 실제 수신 데이터 (32바이트)
+
+	        nrf24l01p_clear_rx_dr();	        		// status 플래그 클리어
+
+	        osMessagePut(RFRx_brailleMsgBox, Rx_Data[0], 0); // 메시지 큐로 데이터 전송
+
+	        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);	        // 디버깅용 LED 토글
+	    }
 	}
 
 
