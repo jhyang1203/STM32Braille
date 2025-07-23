@@ -96,6 +96,7 @@ void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackTy
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
 	ILI9341_Init();
+	LCD_InitOnce();
 //	dfp_init(5);
   /* USER CODE END Init */
 

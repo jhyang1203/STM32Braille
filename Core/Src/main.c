@@ -204,7 +204,7 @@ void SystemClock_Config(void)
 	    if (hspi->Instance == SPI2 && rf_state == S_RX_MODE)
 	    {
 	        cs_high();  // ✅ 통신 종료
-	        HAL_UART_Transmit(&huart2, (uint8_t *)"tx rx callback\r\n", strlen("tx rx callback\r\n"), 1000);
+	        HAL_UART_Transmit(&huart2, (uint8_t *)"---Rx start(interrupt)---\r\n", strlen("---Rx start(interrupt)---\r\n"), 1000);
 	        uint8_t status = spi_rx_buf[0]; 	        // STATUS 레지스터 확인 (선택사항)
 	        uint8_t* Rx_Data = &spi_rx_buf[1];	        // 실제 수신 데이터 (32바이트)
 
@@ -239,7 +239,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE BEGIN Callback 1 */
   if (htim->Instance == TIM4)
   {
-	  HAL_UART_Transmit(&huart2, (uint8_t *)"timer callback---------------\r\n", strlen("timer callback------------------\r\n"), 1000);
+	  HAL_UART_Transmit(&huart2, (uint8_t *)"---Tx finish(interrupt)---\r\n", strlen("---Tx finish(interrupt)---\r\n"), 1000);
 	  	tx_done_flag = 1;
   }
   /* USER CODE END Callback 1 */

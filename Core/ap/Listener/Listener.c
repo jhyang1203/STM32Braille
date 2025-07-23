@@ -104,7 +104,6 @@ void Listener_Execute()
 					}
 					else if (tx_done_flag==1) { // 수신 모드로 변경
 					    HAL_TIM_Base_Stop_IT(&htim4);  // 타이머 인터럽트 정지 (1회만 사용)
-						HAL_UART_Transmit(&huart2, (uint8_t *)"tx finish\r\n", strlen("tx finish\r\n"), 1000);
 						nrf24l01p_rx_init(2500, _1Mbps);
 						rf_state = S_RX_MODE;
 					}
